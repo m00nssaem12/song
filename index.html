@@ -785,18 +785,64 @@ Object.assign(INST,{
 });
 const HARM={blow:[60,64,67,72,76,79,84],draw:[62,67,71,74,77,81,83]};
 const BOWED={violin:{open:{G:55,D:62,A:69,E:76},order:['G','D','A','E'],col:STRC},
-  cello:{open:{C:36,G:43,D:50,A:57},order:['C','G','D','A'],col:{C:'#4e342e',G:'#6d4c41',D:'#8d6e63',A:'#b5523b'}}};
+  cello:{open:{C:36,G:43,D:50,A:57},order:['C','G','D','A'],col:{C:'#4e342e',G:'#6d4c41',D:'#8d6e63',A:'#b5523b'}},
+  viola:{open:{C:48,G:55,D:62,A:69},order:['C','G','D','A'],col:{C:'#5d4037',G:'#795548',D:'#a1887f',A:'#c0705a'}},
+  contrabass:{open:{E:28,A:33,D:38,G:43},order:['E','A','D','G'],col:{E:'#3e2723',A:'#4e342e',D:'#6d4c41',G:'#8d6e63'}}};
+const DANSO_N={68:'중',70:'임',73:'무',75:'황',77:'태',80:'중',82:'임',85:'무',87:'황'};
+// 운지: [뒷구멍, 앞1(위), 앞2, 앞3, 앞4(아래)] 1=막음 (성신여대 논문 '초등학교 졸업생들의 단소 실기 능력 조사' 표 Ⅱ-1)
+const DANSO_F={'중':[1,1,1,1,0],'임':[1,1,1,0,0],'무':[1,1,0,0,0],'황':[1,0,0,0,0],'태':[0,0,0,0,0]};
+const FLATK=['도','레♭','레','미♭','미','파','솔♭','솔','라♭','라','시♭','시'];
+function dansoReal(){return techOf('danso','c')==='real';}
+function dansoM(m){return dansoReal()?m:m-1;}
+function dansoWest(m){return dansoReal()?FLATK[m%12]:NK[(m-1)%12];}
+const BOWK=new Set(['violin','viola','cello','contrabass']);
 function strOf(k,m){const B=BOWED[k];let r=B.order[0];B.order.forEach(n=>{if(m>=B.open[n])r=n;});return r;}
 Object.assign(INST,{bass6:{family:'현악기 (낮은 소리)',name:'6현 베이스',color:'#4a3ab8',kind:'mono',hold:true,tie:true,pitches:range(23,52).reverse(),
   range:'시0 ~ 미3 (6줄)',poly:'한 번에 한 음만',
   how:'보통 베이스보다 줄이 2개 더 있어요. 아래에 더 낮은 B줄, 위에 더 높은 C줄이 있어서 아주 낮은 소리부터 가락까지 넓게 칠 수 있어요.',
   rule:'B·E·A·D·G·C 여섯 줄이에요. 맨 아래 B줄은 땅이 울리는 것처럼 아주 낮아요. 주법과 치는 방법은 베이스와 같아요.'}});
-const KEYB=new Set(['piano','synth','melodica','marimba']);
+const KEYB=new Set(['piano','synth','melodica','marimba','vibraphone']);
 Object.assign(INST,{
  melodica:{family:'건반악기 (부는)',name:'멜로디언',color:'#0097a7',kind:'poly',hold:true,tie:true,pitches:range(53,77).reverse(),
   range:'파3 ~ 파5',poly:'여러 음 동시에',
   how:'관에 입으로 바람을 불면서 건반을 눌러요. 누른 건반의 리드(얇은 쇠판)에 바람이 들어가 떨리면서 소리가 나요.',
   rule:'숨을 불어 넣는 동안만 소리가 나서, 누르고 있는 만큼 소리가 이어져요. 피아노처럼 화음도 칠 수 있어요.'},
+ danso:{family:'우리 관악기 (세로로 부는)',name:'단소',color:'#8a6a2c',kind:'mono',hold:true,tie:true,pitches:[87,85,82,80,77,75,73,70,68],
+  range:'중 ~ 높은 황 (9음)',poly:'한 번에 한 음만',
+  how:'대나무로 만든 짧은 세로 피리예요. 위쪽 끝의 취구(U자 홈)에 입김을 비스듬히 불어 넣고, 뒷구멍 1개와 앞구멍 4개를 막았다 열었다 해요.',
+  rule:'중·임·무·황·태 다섯 음을 써요. 많이 막을수록 낮은 소리! 높은 음은 같은 운지로 더 세게 불어요. 기본은 다른 악기와 어울리게 반음 낮춘 높이(무=도)이고, 주법에서 진짜 단소 높이(황=미♭)로 바꿀 수 있어요.'},
+ flute:{family:'관악기 (목관)',name:'플루트',color:'#78909c',kind:'mono',hold:true,tie:true,pitches:diatonic(60,84).reverse(),
+  range:'도4 ~ 도6',poly:'한 번에 한 음만',
+  how:'은빛 관을 옆으로 들고 입술판의 구멍 가장자리에 바람을 불어 소리를 내요. 리드가 없어서 맑고 부드러워요.',
+  rule:'숨을 불어 넣는 동안 소리가 이어져요. 높은 음이 특히 맑아서 가락을 맡기 좋아요.'},
+ clarinet:{family:'관악기 (목관, 리드 1장)',name:'클라리넷',color:'#37474f',kind:'mono',hold:true,tie:true,pitches:diatonic(52,79).reverse(),
+  range:'미3 ~ 솔5',poly:'한 번에 한 음만',
+  how:'검은 나무 관 끝 마우스피스에 얇은 갈대 리드 1장이 붙어 있어요. 리드가 떨리며 소리가 나요.',
+  rule:'낮은 음은 따뜻하고 동굴처럼 깊고, 높은 음은 밝아요. 관악대와 오케스트라에서 가락을 많이 맡아요.'},
+ sax:{family:'관악기 (리드 1장, 금속 몸통)',name:'색소폰',color:'#c9971c',kind:'mono',hold:true,tie:true,pitches:diatonic(50,77).reverse(),
+  range:'레3 ~ 파5 (알토)',poly:'한 번에 한 음만',
+  how:'금속으로 만들었지만 클라리넷처럼 리드 1장으로 소리를 내요. 몸통이 구부러져 있고 끝이 나팔처럼 벌어져요.',
+  rule:'재즈와 팝에서 많이 쓰는 굵고 힘 있는 소리예요. 같은 음을 이어 칠하면 길게 불어요.'},
+ ocarina:{family:'관악기 (흙으로 빚은)',name:'오카리나',color:'#b0613a',kind:'mono',hold:true,tie:true,pitches:diatonic(69,89).reverse(),
+  range:'라4 ~ 파6 (알토 C)',poly:'한 번에 한 음만',
+  how:'흙을 구워 만든 고구마 모양 피리예요. 앞의 구멍을 막았다 열었다 하고, 열린 구멍이 많을수록 높은 소리가 나요.',
+  rule:'떨림이 적은 동그랗고 순한 소리예요. 높은 음이 맑아서 동요 가락에 잘 어울려요.'},
+ timpani:{family:'타악기 (음높이 있음)',name:'팀파니',color:'#a0522d',kind:'poly',max:2,pitches:diatonic(43,55).reverse(),
+  range:'솔2 ~ 솔3',poly:'채가 두 개 → 최대 2음',
+  how:'구리로 만든 큰 솥 위에 가죽을 씌운 북이에요. 북마다 음높이가 정해져 있어서 가락처럼 칠 수 있어요.',
+  rule:'오케스트라에서 웅장함을 더해 줘요. 곡 끝에서 굴리기(롤)로 "두르르르 쾅!" 해 보세요. 큰 북일수록 낮은 소리예요.'},
+ vibraphone:{family:'타악기 (음높이 있음)',name:'비브라폰',color:'#90a4ae',kind:'poly',max:4,pitches:range(53,77).reverse(),
+  range:'파3 ~ 파5',poly:'채 4개 → 최대 4음',
+  how:'마림바처럼 생겼지만 음판이 금속이에요. 아래 울림관 위에서 작은 날개(모터)가 돌면 소리가 울렁울렁 떨려요.',
+  rule:'소리가 길고 부드럽게 울려요. 주법에서 "모터 켜기"를 고르면 꿈꾸는 듯한 떨림이 생겨요. 재즈에서 많이 써요.'},
+ viola:{family:'현악기 (활로 긋는)',name:'비올라',color:'#9c5a3c',kind:'mono',hold:true,tie:true,pitches:diatonic(48,72).reverse(),
+  range:'도3 ~ 도5 (가운데)',poly:'한 번에 한 음만',
+  how:'바이올린보다 조금 크고, 어깨에 올려 턱으로 받치고 활로 줄을 그어요.',
+  rule:'C·G·D·A 네 줄이에요. 바이올린보다 낮고 첼로보다 높은, 부드럽고 차분한 가운데 소리예요. 같은 음을 이어 칠하면 활을 길게 그어요.'},
+ contrabass:{family:'현악기 (활로 긋는)',name:'콘트라베이스',color:'#4e2c1e',kind:'mono',hold:true,tie:true,pitches:diatonic(28,48).reverse(),
+  range:'미1 ~ 도3 (아주 낮음)',poly:'한 번에 한 음만',
+  how:'현악기 가운데 가장 크고 낮은 악기예요. 서서 또는 높은 의자에 앉아 활로 긋거나 손가락으로 뜯어요. 더블베이스라고도 해요.',
+  rule:'E·A·D·G 네 줄이에요. 오케스트라와 재즈에서 가장 낮은 소리로 바닥을 받쳐 줘요. 재즈에서는 손가락으로 뜯는 피치카토를 많이 써요.'},
  cello:{family:'현악기 (활로 긋는)',name:'첼로',color:'#7b3f2a',kind:'mono',hold:true,tie:true,pitches:diatonic(36,60).reverse(),
   range:'도2 ~ 도4 (낮음)',poly:'한 번에 한 음만',
   how:'바이올린보다 훨씬 크고 낮은 악기예요. 의자에 앉아 다리 사이에 세우고 활로 줄을 그어요.',
@@ -854,7 +900,7 @@ Object.assign(INST,{
   how:'커다란 쇠 드럼통 뚜껑을 두드려 오목하게 만든 악기예요. 움푹한 자리마다 음이 달라요.',
   rule:'바깥쪽 큰 자리는 낮은 음, 안쪽 작은 자리는 높은 음! 카리브해의 밝고 통통 튀는 소리예요.'}
 });
-const ORDER=['voice','piano','synth','melodica','guitar','eguitar','ukulele','bass','bass6','harp','violin','cello','recorder','harmonica','trumpet','xylo','marimba','kalimba','steelpan','handbell','drums','cajon','rhythm','janggu','pungmul','gayageum','haegeum'];
+const ORDER=['voice','piano','synth','melodica','guitar','eguitar','ukulele','bass','bass6','harp','violin','viola','cello','contrabass','recorder','flute','clarinet','sax','ocarina','harmonica','trumpet','xylo','marimba','vibraphone','kalimba','steelpan','handbell','timpani','drums','cajon','rhythm','janggu','pungmul','gayageum','haegeum','danso'];
 
 /* ---------- 상태 ---------- */
 let myId=localStorage.getItem('dgjk_uid');
@@ -873,7 +919,7 @@ function aAdd(d,s,x){const a=d.a||(d.a={});const r=a[s]||(a[s]=[]);if(!r.include
 function aDel(d,s,x){const a=d.a;if(!a||!a[s])return;a[s]=a[s].filter(y=>y!==x);if(!a[s].length)delete a[s];}
 function sepNote(d,s,len,x){const n=d.n||{};if((n[s-1]||[]).includes(x))aAdd(d,s,x);else aDel(d,s,x);for(let i=1;i<len;i++)aDel(d,s+i,x);if((n[s+len]||[]).includes(x))aAdd(d,s+len,x);}
 function S(){return song.bars*SPB();}
-const TAG={piano:'피',synth:'신',guitar:'기',ukulele:'우',bass:'베',violin:'바',drums:'드',janggu:'장',rhythm:'타',xylo:'실',kalimba:'칼',recorder:'리',trumpet:'트',melodica:'멜',cello:'첼',gayageum:'가',pungmul:'풍',handbell:'벨',harmonica:'하',voice:'목',bass6:'6',eguitar:'일',harp:'프',haegeum:'해',marimba:'마',cajon:'카',steelpan:'스'};
+const TAG={piano:'피',synth:'신',guitar:'기',ukulele:'우',bass:'베',violin:'바',drums:'드',janggu:'장',rhythm:'타',xylo:'실',kalimba:'칼',recorder:'리',trumpet:'트',melodica:'멜',cello:'첼',viola:'비',contrabass:'콘',danso:'단',flute:'플',clarinet:'클',sax:'색',ocarina:'오',timpani:'팀',vibraphone:'브',gayageum:'가',pungmul:'풍',handbell:'벨',harmonica:'하',voice:'목',bass6:'6',eguitar:'일',harp:'프',haegeum:'해',marimba:'마',cajon:'카',steelpan:'스'};
 function stamp(k,sz){return `<span class="stamp ${sz||''}" style="--c:${INST[k].color}">${TAG[k]||''}</span>`;}
 function ampHTML(k){
   const T=toneOf(k),keys=['b','r'].concat(k==='eguitar'?['d']:[]).concat(['m']);
@@ -904,6 +950,7 @@ function canEdit(t){if(isLocked(t))return false;return mode!=='online'||t.owner=
 function ownerLabel(t){if(!t)return'';if(mode==='local')return (members.find(m=>m.id===t.owner)||{}).name||'';if(mode==='online')return t.ownerName||'';return'';}
 function vol(k){const m=mix[k];return m&&m.vol!=null?m.vol:0.8;}
 function nameOf(k,m){
+  if(k==='danso')return (m>=80?'높은 ':'')+(DANSO_N[m]||'');
   if(k==='recorder'||k==='xylo'){if(m===84)return'높은 도';if(m===86)return'높은 레';}
   return NK[m%12];
 }
@@ -989,9 +1036,9 @@ function pXylo(m,t,v){
 }
 function bowBody(k,o){
   // 나무 몸통 울림(공명) 흉내
-  const c=k==='cello',pk=(f,q,gdb,d)=>{const b=AC.createBiquadFilter();b.type='peaking';b.frequency.value=f;b.Q.value=q;b.gain.value=gdb;b.connect(d);return b;};
-  const lp=filt('lowpass',c?3200:6500,0.6,o);
-  return pk(c?110:280,2,5,pk(c?220:460,2.5,4,pk(c?1100:2800,1.2,5,filt('highpass',c?55:180,0,lp))));
+  const c=k==='cello'||k==='contrabass',db=k==='contrabass',va=k==='viola',pk=(f,q,gdb,d)=>{const b=AC.createBiquadFilter();b.type='peaking';b.frequency.value=f;b.Q.value=q;b.gain.value=gdb;b.connect(d);return b;};
+  const lp=filt('lowpass',db?2000:c?3200:va?5200:6500,0.6,o);
+  return pk(db?70:c?110:va?220:280,2,5,pk(db?150:c?220:va?380:460,2.5,4,pk(db?700:c?1100:va?2200:2800,1.2,5,filt('highpass',db?32:c?55:va?120:180,0,lp))));
 }
 function pVio(m,t,dur,v,hold,k){
   k=k||'violin';const tech=techOf(k,'arco');
@@ -1078,6 +1125,43 @@ function pBell(m,t,v){
     const g=gn(lp,0);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(a,t+0.0025);g.gain.setTargetAtTime(0,t+0.0025,d);osc('sine',f*h,t,t+Math.min(7,d*6),g);});
   burst(lp,t,'bandpass',Math.min(9000,f*6),2,0.06,0.006);
 }
+function pWind(m,t,dur,v,hold,k){
+  // 플루트·단소·오카리나: 관 소리 + 바람 소리
+  const P={flute:{g:0.34,h2:0.25,h3:0.08,br:0.2,bq:1.2,vib:0.006,lp:5},danso:{g:0.32,h2:0.16,h3:0.07,br:0.42,bq:0.9,vib:0.004,lp:4,bend:1},ocarina:{g:0.38,h2:0.05,h3:0.012,br:0.07,bq:2,vib:0.0025,lp:3}}[k];
+  const f=mtof(m),o=out(v*P.g,0.32),end=t+Math.max(0.08,dur*0.95);
+  const g=gn(filt('lowpass',f*P.lp,0.5,o),0);g.gain.setValueAtTime(0,t);g.gain.setTargetAtTime(1,t,k==='ocarina'?0.02:0.035);if(!hold)g.gain.setTargetAtTime(0,end,0.04);
+  const o1=osc('sine',f,t,end+0.3,g,0.8),o2=osc('sine',f*2,t,end+0.3,g,P.h2),o3=osc('triangle',f*3,t,end+0.3,g,P.h3);
+  if(P.bend){o1.frequency.setValueAtTime(f*0.97,t);o1.frequency.exponentialRampToValueAtTime(f,t+0.12);}
+  const lfo=AC.createOscillator();lfo.frequency.value=5.3;const lg=AC.createGain();lg.gain.setValueAtTime(0,t);lg.gain.linearRampToValueAtTime(0,t+0.3);lg.gain.linearRampToValueAtTime(f*P.vib,t+0.7);
+  lfo.connect(lg);[o1,o2,o3].forEach(x=>lg.connect(x.frequency));lfo.start(t);lfo.stop(end+0.3);
+  const bg=gn(filt('bandpass',f*2,P.bq,o),0);bg.gain.setValueAtTime(P.br,t);bg.gain.setTargetAtTime(P.br*0.35,t+0.03,0.06);if(!hold)bg.gain.setTargetAtTime(0,end,0.03);noise(t,end+0.3,bg);
+  return [g,bg];
+}
+function pReed2(m,t,dur,v,hold,k){
+  // 색소폰(굵고 밝게) · 클라리넷(홀수 배음이 많은 네모파)
+  const sax=k==='sax',f=mtof(m),o=out(v*0.3,0.3),end=t+Math.max(0.08,dur*0.95);
+  let dest=o;if(sax){const pk=filt('peaking',1100,1.2,o);pk.gain.value=7;dest=pk;}
+  const lp=filt('lowpass',f*2,sax?2:1,dest);lp.frequency.setValueAtTime(f*2,t);lp.frequency.setTargetAtTime(Math.min(9000,f*(sax?7:4.5)),t,0.06);
+  const g=gn(lp,0);g.gain.setValueAtTime(0,t);g.gain.setTargetAtTime(1,t,sax?0.025:0.035);if(!hold)g.gain.setTargetAtTime(0,end,0.04);
+  const o1=osc(sax?'sawtooth':'square',f,t,end+0.4,g,sax?0.5:0.45),o2=osc('square',f*1.003,t,end+0.4,g,sax?0.2:0.25);
+  const lfo=AC.createOscillator();lfo.frequency.value=5.2;const lg=AC.createGain();lg.gain.setValueAtTime(0,t);lg.gain.linearRampToValueAtTime(0,t+0.35);lg.gain.linearRampToValueAtTime(f*(sax?0.007:0.003),t+0.8);
+  lfo.connect(lg);lg.connect(o1.frequency);lg.connect(o2.frequency);lfo.start(t);lfo.stop(end+0.4);
+  const bg=gn(filt('bandpass',f*3,1,o),0);bg.gain.setValueAtTime(0.12,t);bg.gain.setTargetAtTime(0.03,t+0.02,0.05);if(!hold)bg.gain.setTargetAtTime(0,end,0.03);noise(t,end+0.3,bg);
+  return [g,bg];
+}
+function pTimp(m,t,v){
+  // 팀파니: 음높이가 또렷한 큰 북 (배음비 1 : 1.5 : 2 : 2.44 : 2.9), 길게 울림
+  const f=mtof(m),o=out(v*0.5,0.35);
+  memb(o,t,f,0.8,1.1,0.02,[[1,1,1],[1.5,0.5,0.7],[1.98,0.35,0.55],[2.44,0.2,0.4],[2.9,0.12,0.3]]);
+  burst(o,t,'lowpass',500,0,0.3,0.02);burst(o,t,'bandpass',1500,1,0.06,0.01);
+}
+function pVibe(m,t,v){
+  // 비브라폰: 금속 음판(배음 1 : 4 : 10), 길게 울림, 모터를 켜면 울렁울렁
+  const f=mtof(m),o=out(v*0.42,0.42),mot=techOf('vibraphone','')==='motor';let d=o;
+  if(mot){const tg=AC.createGain();tg.gain.value=0.65;tg.connect(o);const l=AC.createOscillator();l.frequency.value=5.5;const lg=AC.createGain();lg.gain.value=0.35;l.connect(lg);lg.connect(tg.gain);l.start(t);l.stop(t+6);d=tg;}
+  [[1,1,1.5],[4,0.16,0.3],[10,0.04,0.05]].forEach(([h,a,dk])=>{const g=gn(d,0);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(a,t+0.003);g.gain.setTargetAtTime(0,t+0.003,dk);osc('sine',f*h,t,t+Math.min(6,dk*6),g);});
+  burst(d,t,'bandpass',Math.min(8000,f*6),1.5,0.05,0.005);
+}
 const TONE_DEF={guitar:{b:55,r:30,m:100},ukulele:{b:60,r:30,m:100},eguitar:{b:60,r:22,d:65,m:100},bass:{b:35,r:6,m:100},bass6:{b:45,r:8,m:100}};
 const TONE_PRE={
  guitar:[['맑게',{b:85,r:35,m:100}],['따뜻하게',{b:22,r:30,m:100}],['짧게 끊기',{b:55,r:12,m:22}]],
@@ -1144,6 +1228,11 @@ const SMP={
  harmonica:{n:'harmonica',g:0.7,mode:'sus',wet:0.2},
  violin:{n:'violin',g:0.85,mode:'sus',wet:0.4},
  cello:{n:'cello',g:0.9,mode:'sus',wet:0.4},
+ viola:{n:'viola',g:0.9,mode:'sus',wet:0.4},
+ contrabass:{n:'contrabass',g:1,mode:'sus',wet:0.35},
+ danso:{n:'shakuhachi',g:0.8,mode:'sus',wet:0.35},flute:{n:'flute',g:0.75,mode:'sus',wet:0.35},clarinet:{n:'clarinet',g:0.75,mode:'sus',wet:0.3},
+ sax:{n:'alto_sax',g:0.7,mode:'sus',wet:0.3},ocarina:{n:'ocarina',g:0.8,mode:'sus',wet:0.35},
+ timpani:{n:'timpani',g:1,mode:'ring',wet:0.35},vibraphone:{n:'vibraphone',g:0.9,mode:'ring',wet:0.4},
  haegeum:{n:'fiddle',g:0.75,mode:'sus',wet:0.35,nasal:1},
  trumpet:{n:'trumpet',g:0.7,mode:'sus',wet:0.3},
  recorder:{n:'recorder',g:0.8,mode:'sus',wet:0.3},
@@ -1166,7 +1255,8 @@ function smpName(k,m){
   if(k==='rhythm')return [['perc',81],['perc',54],['perc',85],['perc',76],['perc',70]][m]||null;
   const c=SMP[k];if(!c||!c.n)return null;
   if(c.mode==='bass'){const t=bassTech(k);return [t==='pick'?'electric_bass_pick':t==='slap'?'slap_bass_1':'electric_bass_finger',m];}
-  if((k==='violin'||k==='cello')&&techOf(k,'arco')==='pizz')return ['pizzicato_strings',m];
+  if(BOWK.has(k)&&techOf(k,'arco')==='pizz')return ['pizzicato_strings',m];
+  if(k==='danso')return [c.n,dansoM(m)];
   return [c.n,m];
 }
 // 음별 파일이 없으면 악기 묶음 파일(이름-mp3.js, 음마다 base64)로 대신 받음
@@ -1231,7 +1321,8 @@ function sfPlay(k,m,t,dur,v,hold){
     const off0=B*0.35,segL=(B*0.9-off0)/r;let st=t,stopAt=t+B*0.9/r,first=true,n=0;
     while(true){const last=stopAt>=end||n>=24;seg(st,first?0:off0,last?Math.min(stopAt,end):stopAt,!first,!last);if(last)break;first=false;n++;st=stopAt-XF;stopAt=st+segL;}
   }else seg(t,0,end+0.03,false,false);
-  if((k==='violin'||k==='cello')&&techOf(k,'arco')==='trem'){const tl=AC.createOscillator();tl.frequency.value=13;const tg=AC.createGain();tg.gain.value=0.45;const g2=AC.createGain();g2.gain.value=0.55;g.disconnect();g.connect(g2);g2.connect(dest);tl.connect(tg);tg.connect(g2.gain);tl.start(t);tl.stop(end+0.1);}
+  if(BOWK.has(k)&&techOf(k,'arco')==='trem'){const tl=AC.createOscillator();tl.frequency.value=13;const tg=AC.createGain();tg.gain.value=0.45;const g2=AC.createGain();g2.gain.value=0.55;g.disconnect();g.connect(g2);g2.connect(dest);tl.connect(tg);tg.connect(g2.gain);tl.start(t);tl.stop(end+0.1);}
+  if(k==='vibraphone'&&techOf(k,'')==='motor'){const tl=AC.createOscillator();tl.frequency.value=5.5;const tg=AC.createGain();tg.gain.value=0.35;const g2=AC.createGain();g2.gain.value=0.65;g.disconnect();g.connect(g2);g2.connect(dest);tl.connect(tg);tg.connect(g2.gain);tl.start(t);tl.stop(end+0.1);}
   if(c.nasal){const lfo=AC.createOscillator();lfo.frequency.value=6;const lg=AC.createGain();lg.gain.setValueAtTime(0,t);lg.gain.linearRampToValueAtTime(0,t+0.2);lg.gain.linearRampToValueAtTime(0.012,t+0.5);lfo.connect(lg);srcs.forEach(x=>lg.connect(x.playbackRate));lfo.start(t);lfo.stop(end+0.1);}
   return [g];
 }
@@ -1248,13 +1339,13 @@ function playStrum(ch,dir,t,v,key,k){
 }
 
 function playInst(k,m,t,dur,v){
-  if((k==='xylo'||k==='marimba'||k==='steelpan')&&techOf(k,'')==='roll'&&!playInst.inRoll){playInst.inRoll=true;try{const n=Math.max(3,Math.round(Math.max(dur,0.2)/0.07));for(let i=0;i<n;i++)playInst(k,m,t+i*Math.max(dur,0.2)/n,dur,v*(i?0.6:0.9));}finally{playInst.inRoll=false;}return;}
+  if((k==='xylo'||k==='marimba'||k==='steelpan'||k==='timpani'||k==='vibraphone')&&techOf(k,'')==='roll'&&!playInst.inRoll){playInst.inRoll=true;try{const n=Math.max(3,Math.round(Math.max(dur,0.2)/0.07));for(let i=0;i<n;i++)playInst(k,m,t+i*Math.max(dur,0.2)/n,dur,v*(i?0.6:0.9));}finally{playInst.inRoll=false;}return;}
   const sr=sfPlay(k,m,t,dur,v,false);if(sr)return sr;
   switch(k){case'piano':return pPiano(m,t,v);case'drums':return pDrum(m,t,v);case'bass':return pBass(m,t,dur,v,false,'bass');case'bass6':return pBass(m,t,dur,v,false,'bass6');
   case'xylo':return pXylo(m,t,v);case'recorder':return pRec(m,t,dur,v);case'violin':return pVio(m,t,dur,v,false,'violin');
   case'janggu':return pJang(m,t,v);case'rhythm':return pRhy(m,t,v);case'kalimba':return pKal(m,t,v);
   case'trumpet':return pTpt(m,t,dur,v);case'synth':return pSyn(m,t,dur,v,false,synWave());
-  case'cello':return pVio(m,t,dur,v,false,'cello');case'gayageum':return pGaya(m,t,v);case'pungmul':return pPung(m,t,v);case'handbell':return pBell(m,t,v);
+  case'cello':return pVio(m,t,dur,v,false,'cello');case'viola':return pVio(m,t,dur,v,false,'viola');case'contrabass':return pVio(m,t,dur,v,false,'contrabass');case'danso':return pWind(dansoM(m),t,dur,v,false,'danso');case'flute':return pWind(m,t,dur,v,false,'flute');case'ocarina':return pWind(m,t,dur,v,false,'ocarina');case'sax':return pReed2(m,t,dur,v,false,'sax');case'clarinet':return pReed2(m,t,dur,v,false,'clarinet');case'timpani':return pTimp(m,t,v);case'vibraphone':return pVibe(m,t,v);case'gayageum':return pGaya(m,t,v);case'pungmul':return pPung(m,t,v);case'handbell':return pBell(m,t,v);
   case'harmonica':return pReed(m,t,dur,v,false,true);case'harp':return pHarp(m,t,v);case'haegeum':return pHae(m,t,dur,v);case'marimba':return pMar(m,t,v);case'cajon':return pCaj(m,t,v);case'steelpan':return pSteel(m,t,v);case'melodica':return pReed(m,t,dur,v,false,false);}
 }
 
@@ -1279,6 +1370,15 @@ function playSample(k,ready){
     case'trumpet':seq([[67,2],[72,2],[76,4]]);break;
     case'melodica':seq([[60,2],[64,2],[67,2],[72,4]]);break;
     case'cello':seq([[48,3],[55,3],[43,5]]);break;
+    case'viola':seq([[60,3],[67,3],[64,5]]);break;
+    case'contrabass':seq([[28,3],[33,3],[40,5]]);break;
+    case'danso':seq([[77,2],[75,2],[73,2],[70,2],[68,4]]);break;
+    case'flute':seq([[72,2],[76,2],[79,2],[84,4]]);break;
+    case'clarinet':seq([[55,2],[60,2],[64,2],[67,4]]);break;
+    case'sax':seq([[62,2],[65,1],[67,1],[69,2],[72,4]]);break;
+    case'ocarina':seq([[72,2],[74,2],[76,2],[79,4]]);break;
+    case'timpani':[[43,0],[48,1],[43,2],[48,3]].forEach(([m,i])=>playInst(k,m,t+i*q*1.5,q,v));break;
+    case'vibraphone':[60,64,67,71,74].forEach((m,i)=>playInst(k,m,t+i*q,q,v));break;
     case'gayageum':[55,60,62,64,67,69,72].forEach((m,i)=>playInst(k,m,t+i*q*0.9,q,v));break;
     case'pungmul':[[2,0],[0,0],[0,1],[1,2],[3,2],[0,3],[4,3],[0,4]].forEach(([r,i])=>playInst(k,r,t+i*q,q,v));break;
     case'handbell':[72,67,64,60].forEach((m,i)=>playInst(k,m,t+i*q*1.4,q,v));break;
@@ -1344,6 +1444,7 @@ function scheduleStep(s,t){
       if(I.tie){if(contd(tr.data,s,x))return;let len=1;while(s+len<S()&&contd(tr.data,s+len,x))len++;playInst(k,x,t,len*sd,v);
         if(me){flashSel(`#stage [data-play="${x}"]`,dl,len*sd*900);
           if(k==='recorder'&&REC_F[x])setTimeout(()=>{if(!hold&&cur==='recorder'){ui.fing=REC_F[x].slice();updRecorderUI();}},Math.max(0,dl));
+          if(k==='danso')setTimeout(()=>{if(!hold&&cur==='danso'){ui.last.danso=x;updDansoUI();}},Math.max(0,dl));
           if(k==='trumpet'&&TPF[x])setTimeout(()=>{if(!hold&&cur==='trumpet'){ui.lip=TPF[x][0];ui.valves=TPF[x].slice(1);updTrumpetUI();}},Math.max(0,dl));
           if(BOWED[k])flashSel(`#stage [data-strline="${strOf(k,x)}"]`,dl,len*sd*900);}}
       else{playInst(k,x,t,sd,v);if(me)flashSel(`#stage [data-play="${x}"]`,dl,140);}
@@ -1403,7 +1504,8 @@ function noteColor(k,v){const I=INST[k];if(k==='xylo')return XC[v%12];if(I.kind=
 
 function pitchLabel(k,m){
   const o=Math.floor(m/12)-1;
-  if(['kalimba','trumpet','harp','haegeum','steelpan'].includes(k))return `${NK[m%12]}<small>${o}</small>`;
+  if(['kalimba','trumpet','harp','haegeum','steelpan','flute','clarinet','sax','ocarina','timpani'].includes(k))return `${NK[m%12]}<small>${o}</small>`;
+  if(k==='danso')return `${DANSO_N[m]}<small>${m>=80?'높은 ':''}${dansoWest(m)}</small>`;
   if(KEYB.has(k))return `<span class="key ${isBlack(m)?'bk':''}">${NK[m%12]}<small>${o}</small>${m===60?' ★':''}</span>`;
   if(k==='xylo'){const i=INST.xylo.pitches.length-1-INST.xylo.pitches.indexOf(m);return `<span class="xbar" style="background:${XC[m%12]};width:${100-i*6}%">${nameOf(k,m)}</span>`;}
   if(BOWED[k]){const st=strOf(k,m);return `<span class="vs" style="--sc:${BOWED[k].col[st]}">${st}현</span>${NK[m%12]}<small>${o}</small>`;}
@@ -1464,7 +1566,7 @@ function toolsFor(k,t){
     h+=`<div class="tg"><span class="tl">치는 방법 (모든 마디)</span>${STRUMS.map((p,i)=>`<button data-strum="${i}">${p.name}</button>`).join('')}</div>`;}
   if(k==='synth')h+=`<div class="tg"><span class="tl">소리 모양 (파형)</span>${[['sine','부드럽게 (사인파)'],['triangle','동글게 (삼각파)'],['square','게임기 소리 (사각파)'],['sawtooth','날카롭게 (톱니파)']].map(([w,l])=>`<button data-wave="${w}" class="${(t.data.w||'sawtooth')===w?'on':''}">${l}</button>`).join('')}</div>`;
   if(TONE_DEF[k])h+=ampHTML(k);
-  const TECHS={piano:[['','그냥 치기'],['pedal','페달 밟기 (길게 울리기)']],violin:[['arco','활로 긋기'],['pizz','손가락으로 뜯기 (피치카토)'],['trem','빠르게 떨기 (트레몰로)']],xylo:[['','한 번 치기'],['roll','굴리기 (롤)']],marimba:[['','한 번 치기'],['roll','굴리기 (롤)']],steelpan:[['','한 번 치기'],['roll','굴리기 (롤)']]};TECHS.cello=TECHS.violin;
+  const TECHS={piano:[['','그냥 치기'],['pedal','페달 밟기 (길게 울리기)']],violin:[['arco','활로 긋기'],['pizz','손가락으로 뜯기 (피치카토)'],['trem','빠르게 떨기 (트레몰로)']],xylo:[['','한 번 치기'],['roll','굴리기 (롤)']],marimba:[['','한 번 치기'],['roll','굴리기 (롤)']],steelpan:[['','한 번 치기'],['roll','굴리기 (롤)']]};TECHS.cello=TECHS.viola=TECHS.contrabass=TECHS.violin;TECHS.timpani=TECHS.xylo;TECHS.vibraphone=[['','한 번 치기'],['motor','모터 켜기 (울렁울렁)'],['roll','굴리기 (롤)']];TECHS.danso=[['c','다른 악기와 어울리게 (무=도)'],['real','진짜 단소 높이 (황=미♭)']];
   if(TECHS[k]){const curT=t.data.tech||TECHS[k][0][0];h+=`<div class="tg"><span class="tl">주법 (소리 내는 방법)</span>${TECHS[k].map(([v,l])=>`<button data-gtech="${v}" class="${curT===v?'on':''}">${l}</button>`).join('')}</div>`;}
   if(BSTR[k]){h+=`<div class="tg"><span class="tl">주법 (소리 내는 방법)</span>${BASS_TECH.map(([v,l])=>`<button data-btech="${v}" class="${(t.data.tech||'finger')===v?'on':''}">${l}</button>`).join('')}</div>`;
     h+=`<div class="tg"><span class="tl">치는 방법 (모든 마디)${(song.tracks.guitar||song.tracks.eguitar||song.tracks.ukulele)?' · 기타 코드를 따라가요':' · 마디마다 가장 낮은 음을 근음으로 써요'}</span>${BASS_PAT.map((p,i)=>`<button data-bpat="${i}">${p.name}</button>`).join('')}</div>`;}
@@ -1496,7 +1598,7 @@ function noteRows(t,I,st,only){
   let rows=I.kind==='drum'?I.rows.map((r,i)=>({v:i,lab:r.n,cls:'drow'})):I.pitches.map(m=>({v:m,lab:pitchLabel(cur,m),cls:(KEYB.has(cur)&&isBlack(m)?'blk ':'')+(KEYB.has(cur)&&m%12===0?'cline':'')+(curScale()?(curScale().pc.includes(m%12)?(m%12===curScale().tonic?' tonic':''):' out'):'')}));
   if(only)rows=rows.filter(R=>only.has(R.v));
   const nb=cur==='recorder'?breathSet(t,st):null,QZ=song.quiz&&song.quiz.inst===cur?song.quiz:null,QM=QZ&&ui.qmark,QA=QZ&&ui.qshow?QZ.ans:null;
-  const txt=['xylo','recorder','violin','cello','bass','bass6','trumpet','kalimba','handbell','harmonica','gayageum','harp','haegeum','steelpan'].includes(cur)||!!(I.rows&&I.rows[0].sym);
+  const txt=['xylo','recorder','danso','flute','clarinet','sax','ocarina','timpani','violin','viola','cello','contrabass','bass','bass6','trumpet','kalimba','handbell','harmonica','gayageum','harp','haegeum','steelpan'].includes(cur)||!!(I.rows&&I.rows[0].sym);
   return rows.map(R=>{
     let c='';
     for(let s=0;s<st;s++){
@@ -1837,8 +1939,8 @@ function bassStage(){
 function violinStage(){
   const k=cur,B=BOWED[k],ys=[52,90,128,166];
   let s=`<svg viewBox="0 0 640 215"><path d="M20 32 L560 24 L560 198 L20 190 Z" fill="#2b2522"/>`;
-  B.order.forEach((n,i)=>{s+=`<line data-strline="${n}" x1="0" y1="${ys[i]}" x2="640" y2="${ys[i]}" stroke="${B.col[n]}" stroke-width="${(k==='cello'?6-i*0.9:4.5-i*0.8).toFixed(1)}"/><text x="26" y="${ys[i]-8}" font-size="12" font-weight="900" fill="#fff">${n}현</text>`;});
-  INST[k].pitches.forEach(m=>{const st=strOf(k,m),semi=m-B.open[st],x=80+semi*(k==='cello'?75:85),y=ys[B.order.indexOf(st)];
+  B.order.forEach((n,i)=>{s+=`<line data-strline="${n}" x1="0" y1="${ys[i]}" x2="640" y2="${ys[i]}" stroke="${B.col[n]}" stroke-width="${({cello:6,contrabass:7,viola:5}[k]||4.5)-i*({contrabass:1}[k]||0.85)}"/><text x="26" y="${ys[i]-8}" font-size="12" font-weight="900" fill="#fff">${n}현</text>`;});
+  INST[k].pitches.forEach(m=>{const st=strOf(k,m),semi=m-B.open[st],x=80+semi*({cello:75,contrabass:80}[k]||85),y=ys[B.order.indexOf(st)];
     s+=`<g data-play="${m}"><circle cx="${x}" cy="${y}" r="15" fill="${semi===0?'#fff':B.col[st]}" stroke="#fff" stroke-width="2"/><text x="${x}" y="${y+5}" text-anchor="middle" font-size="12" font-weight="900" fill="${semi===0?B.col[st]:'#fff'}">${NK[m%12]}</text></g>`;});
   s+=`<g class="bow"><rect x="592" y="6" width="10" height="204" rx="4" fill="#a1887f"/><rect x="603" y="12" width="4" height="192" fill="#f5f5f5"/></g>`;
   return s+'</svg>';
@@ -2019,6 +2121,99 @@ function marStage(){
     s+=`<g data-play="${m}"><rect x="${x+3}" y="${cy-h/2}" width="${W-6}" height="${h}" rx="5" fill="#6d3412" stroke="#3e2723" stroke-width="2"/><text x="${x+W/2}" y="${cy+4}" text-anchor="middle" font-size="10" font-weight="900" fill="#fff">${NK[m%12]}</text></g>`;});
   return s+'</svg>';
 }
+/* ---------- 새 관악기·타악기 모습 ---------- */
+// 음 버튼 줄 (관악기 공통)
+function noteRow(k,y,h,fill,stroke,txt){const ps=INST[k].pitches.slice().sort((a,b)=>a-b),N=ps.length,W=Math.min(66,600/N);let s='';
+  ps.forEach((m,i)=>{const x=320-N*W/2+i*W,o=Math.floor(m/12)-1;
+    s+=`<g data-play="${m}"><rect x="${x+3}" y="${y}" width="${W-6}" height="${h}" rx="10" fill="${fill}" stroke="${stroke}" stroke-width="2"/><text x="${x+W/2}" y="${y+h/2+2}" text-anchor="middle" font-size="${W<44?13:15}" font-weight="900" fill="${txt}">${NK[m%12]}</text><text x="${x+W/2}" y="${y+h/2+17}" text-anchor="middle" font-size="10" fill="${txt}" opacity=".75">${o}</text></g>`;});
+  return s;}
+function dansoStage(){
+  const m=ui.last.danso||77,F=DANSO_F[DANSO_N[m]]||DANSO_F['태'],hi=m>=80;
+  let s=`<svg viewBox="0 0 640 240"><defs><linearGradient id="dsB" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#e9cf8e"/><stop offset=".45" stop-color="#c9a35a"/><stop offset="1" stop-color="#8a6a2c"/></linearGradient></defs>
+  <rect x="40" y="44" width="560" height="40" rx="16" fill="url(#dsB)" stroke="#6b4f1d" stroke-width="2"/>
+  ${[150,300,470].map(x=>`<rect x="${x}" y="44" width="7" height="40" fill="#7a5a22" opacity=".55"/><rect x="${x+7}" y="44" width="3" height="40" fill="#f3e2b0" opacity=".5"/>`).join('')}
+  <path d="M40 54 Q52 64 40 74" fill="#3e2a0c"/><text x="44" y="104" font-size="11" fill="#6b4f1d">취구 (입김 넣는 곳)</text><text x="596" y="104" text-anchor="end" font-size="11" fill="#6b4f1d">아래 끝</text>
+  <circle cx="230" cy="64" r="15" fill="none" stroke="#6b4f1d" stroke-width="1.5" opacity=".6"/><circle data-dh="0" cx="230" cy="64" r="11" fill="${F[0]?'#3a2f25':'#fff'}" stroke="#3a2f25" stroke-width="2.5"/><text x="230" y="98" text-anchor="middle" font-size="10" fill="#6b4f1d">(뒤쪽)</text><text x="230" y="36" text-anchor="middle" font-size="11" fill="#6b4f1d">뒷구멍 (왼손 엄지)</text>
+  ${[330,385,440,495].map((x,i)=>`<circle data-dh="${i+1}" cx="${x}" cy="64" r="11" fill="${F[i+1]?'#3a2f25':'#fff'}" stroke="#3a2f25" stroke-width="2.5"/>`).join('')}
+  <text x="412" y="36" text-anchor="middle" font-size="11" fill="#6b4f1d">앞구멍 (왼손 검지·중지, 오른손 검지·중지)</text>
+  <text id="dsNow" x="320" y="128" text-anchor="middle" font-size="15" font-weight="900" fill="#6b4f1d">${hi?'높은 ':''}${DANSO_N[m]} (${dansoWest(m)})${hi?' · 더 세게 불기':''}</text>`;
+  const ps=INST.danso.pitches.slice().sort((a,b)=>a-b),W=64;
+  ps.forEach((p,i)=>{const x=320-ps.length*W/2+i*W,h=p>=80;
+    s+=`<g data-play="${p}"><rect x="${x+3}" y="142" width="${W-6}" height="78" rx="12" fill="${h?'#fff3d6':'#f6e4b8'}" stroke="#8a6a2c" stroke-width="2"/>${h?`<circle cx="${x+W/2}" cy="156" r="3.5" fill="#8a6a2c"/>`:''}<text x="${x+W/2}" y="188" text-anchor="middle" font-size="24" font-weight="900" fill="#5a3e10">${DANSO_N[p]}</text><text x="${x+W/2}" y="208" text-anchor="middle" font-size="11" fill="#7a5a22">${dansoWest(p)}</text></g>`;});
+  return s+'</svg>';
+}
+function updDansoUI(){const m=ui.last.danso||77,F=DANSO_F[DANSO_N[m]];if(!F)return;
+  document.querySelectorAll('#stage [data-dh]').forEach(c=>c.setAttribute('fill',F[+c.dataset.dh]?'#3a2f25':'#fff'));
+  const t=document.getElementById('dsNow');if(t)t.textContent=`${m>=80?'높은 ':''}${DANSO_N[m]} (${dansoWest(m)})${m>=80?' · 더 세게 불기':''}`;}
+function fluteStage(){
+  // 머리관(입술판) · 몸통 · 발관, 키(패드)와 막대
+  let keys='';[214,246,278,318,350,382,414,446,486,520,552].forEach((x,i)=>keys+=`<circle cx="${x}" cy="62" r="${i%4===3?7:9}" fill="url(#flS)" stroke="#6f7c84" stroke-width="1.5"/><circle cx="${x}" cy="62" r="3" fill="#cfd8dc"/>`);
+  return `<svg viewBox="0 0 640 230"><defs><linearGradient id="flS" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".5" stop-color="#b8c3c9"/><stop offset="1" stop-color="#7d8a91"/></linearGradient></defs>
+  <rect x="16" y="54" width="14" height="18" rx="5" fill="#9aa5ab"/><rect x="28" y="50" width="590" height="24" rx="6" fill="url(#flS)" stroke="#6f7c84" stroke-width="1.5"/>
+  <rect x="150" y="48" width="8" height="28" rx="2" fill="#9aa5ab"/><rect x="580" y="48" width="8" height="28" rx="2" fill="#9aa5ab"/>
+  <ellipse cx="82" cy="50" rx="22" ry="9" fill="url(#flS)" stroke="#6f7c84" stroke-width="1.5"/><ellipse cx="82" cy="50" rx="8" ry="4" fill="#263238"/>
+  <line x1="200" y1="46" x2="600" y2="46" stroke="#8a969c" stroke-width="2"/>${keys}
+  <text x="82" y="96" text-anchor="middle" font-size="11" fill="#546e7a">입술판</text>
+  ${noteRow('flute',120,82,'url(#flS)','#6f7c84','#263238')}</svg>`;
+}
+function clarinetStage(){
+  let keys='';[230,262,294,350,382,414,470,502].forEach(x=>keys+=`<circle cx="${x}" cy="62" r="8" fill="#2a2a2a" stroke="#c0c8cc" stroke-width="3"/>`);
+  let rods='';[[220,300],[340,430],[460,560]].forEach(([a,b])=>rods+=`<line x1="${a}" y1="48" x2="${b}" y2="48" stroke="#c0c8cc" stroke-width="2.5"/>`);
+  return `<svg viewBox="0 0 640 230"><defs><linearGradient id="clB" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#5a5a5a"/><stop offset=".4" stop-color="#262626"/><stop offset="1" stop-color="#111"/></linearGradient><linearGradient id="clS" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#9aa5ab"/></linearGradient></defs>
+  <path d="M18 56 L70 52 L70 72 L18 68 Q12 62 18 56 Z" fill="#1b1b1b"/><rect x="40" y="50" width="12" height="24" rx="2" fill="url(#clS)"/><path d="M20 58 L60 56" stroke="#d9c38a" stroke-width="3"/>
+  <rect x="70" y="49" width="60" height="26" rx="5" fill="url(#clB)"/><rect x="128" y="47" width="8" height="30" rx="2" fill="url(#clS)"/>
+  <rect x="136" y="50" width="200" height="24" fill="url(#clB)"/><rect x="334" y="47" width="8" height="30" rx="2" fill="url(#clS)"/><rect x="342" y="50" width="210" height="24" fill="url(#clB)"/><rect x="550" y="47" width="8" height="30" rx="2" fill="url(#clS)"/>
+  <path d="M558 50 L590 50 Q610 50 628 32 L628 92 Q610 74 590 74 L558 74 Z" fill="url(#clB)"/><rect x="624" y="30" width="6" height="64" rx="2" fill="url(#clS)"/>
+  ${rods}${keys}<text x="40" y="96" font-size="11" fill="#455a64">마우스피스·리드</text><text x="600" y="110" text-anchor="middle" font-size="11" fill="#455a64">벨</text>
+  ${noteRow('clarinet',122,82,'#2b2b2b','#c0c8cc','#ffffff')}</svg>`;
+}
+function saxStage(){
+  // 알토 색소폰(세워 놓은 모습) + 음 버튼
+  const ps=INST.sax.pitches.slice().sort((a,b)=>a-b),half=Math.ceil(ps.length/2),W=50;
+  let keys='';[[112,70],[116,92],[120,114],[124,140],[128,162],[132,184]].forEach(([x,y])=>keys+=`<circle cx="${x}" cy="${y}" r="7" fill="#f6efe0" stroke="#8a6a12" stroke-width="2"/>`);
+  let s=`<svg viewBox="0 0 640 250"><defs><linearGradient id="sxG" x1="0" x2="1"><stop offset="0" stop-color="#8a6510"/><stop offset=".35" stop-color="#f6d77a"/><stop offset=".6" stop-color="#d4a32c"/><stop offset="1" stop-color="#7a560c"/></linearGradient></defs>
+  <path d="M60 30 Q70 14 96 22 L108 36" stroke="url(#sxG)" stroke-width="10" fill="none" stroke-linecap="round"/><path d="M48 34 L64 26" stroke="#1b1b1b" stroke-width="9" stroke-linecap="round"/>
+  <path d="M100 32 L116 32 L140 200 Q144 236 110 238 Q78 238 74 214 L72 196 L94 196 L96 210 Q100 222 112 220 Q124 218 120 196 Z" fill="url(#sxG)" stroke="#6b4c08" stroke-width="2"/>
+  <path d="M74 214 Q60 200 52 176 Q46 160 58 156 L84 152 Q96 154 94 168 L94 196 L72 196 Z" fill="url(#sxG)" stroke="#6b4c08" stroke-width="2"/><ellipse cx="70" cy="155" rx="24" ry="8" fill="#5a3f06" stroke="#6b4c08" stroke-width="2"/>
+  ${keys}<text x="96" y="248" text-anchor="middle" font-size="11" fill="#6b4c08">알토 색소폰</text>`;
+  ps.forEach((m,i)=>{const r=i<half?1:0,j=r?i:i-half,x=196+j*W,y=r?140:46,o=Math.floor(m/12)-1;
+    s+=`<g data-play="${m}"><circle cx="${x+W/2}" cy="${y+36}" r="22" fill="#f6efe0" stroke="#b8860b" stroke-width="3"/><text x="${x+W/2}" y="${y+40}" text-anchor="middle" font-size="14" font-weight="900" fill="#5a3f06">${NK[m%12]}</text><text x="${x+W/2}" y="${y+54}" text-anchor="middle" font-size="9" fill="#8a6a12">${o}</text></g>`;});
+  return s+`<text x="420" y="34" text-anchor="middle" font-size="11" fill="#8a6a12">높은 음</text><text x="420" y="242" text-anchor="middle" font-size="11" fill="#8a6a12">낮은 음</text></svg>`;
+}
+function ocarinaStage(){
+  // 고구마 모양 흙피리 + 앞구멍 8개·작은 구멍 2개
+  const holes=[[230,70,10],[262,62,10],[294,60,10],[326,62,9],[370,64,10],[402,64,10],[434,68,10],[466,76,9],[300,96,5],[400,98,5]];
+  return `<svg viewBox="0 0 640 240"><defs><radialGradient id="ocG" cx="45%" cy="35%" r="70%"><stop offset="0" stop-color="#e8a27a"/><stop offset=".6" stop-color="#b0613a"/><stop offset="1" stop-color="#7a3a1c"/></radialGradient></defs>
+  <path d="M150 74 Q160 30 260 30 L420 30 Q520 32 520 82 Q518 128 430 130 L250 130 Q180 128 166 104 L120 104 Q104 102 104 90 Q104 78 120 78 Z" fill="url(#ocG)" stroke="#5a2a12" stroke-width="2.5"/>
+  <rect x="104" y="80" width="18" height="22" rx="4" fill="#7a3a1c"/><rect x="104" y="88" width="12" height="5" rx="2" fill="#2a1206"/><path d="M178 70 L196 70 L190 80 Z" fill="#2a1206"/>
+  ${holes.map(([x,y,r])=>`<circle cx="${x}" cy="${y}" r="${r}" fill="#3a1a08" stroke="#f0c9a8" stroke-width="1.5"/>`).join('')}
+  <path d="M220 44 Q300 36 380 40" stroke="#f6d4b8" stroke-width="5" fill="none" opacity=".45" stroke-linecap="round"/>
+  <text x="112" y="124" text-anchor="middle" font-size="11" fill="#7a3a1c">부는 곳</text>
+  ${noteRow('ocarina',146,80,'#f3d9c4','#b0613a','#5a2a12')}</svg>`;
+}
+function timpStage(){
+  // 구리 솥 모양 북 여러 개 (큰 북 = 낮은 소리)
+  const ps=INST.timpani.pitches.slice().sort((a,b)=>a-b),N=ps.length,W=600/N;
+  let s=`<svg viewBox="0 0 640 240"><defs><linearGradient id="tpC" x1="0" x2="1"><stop offset="0" stop-color="#7a3a14"/><stop offset=".35" stop-color="#e8a060"/><stop offset=".6" stop-color="#c0703a"/><stop offset="1" stop-color="#6a2e0c"/></linearGradient></defs>`;
+  ps.forEach((m,i)=>{const cx=20+W*i+W/2,rx=W/2-2-i*1.2,ry=rx*0.36,top=70+i*4,bh=rx*1.25;
+    s+=`<g stroke="#5f646b" stroke-width="3" stroke-linecap="round"><line x1="${cx-rx*0.55}" y1="${top+bh*0.8}" x2="${cx-rx*0.7}" y2="226"/><line x1="${cx+rx*0.55}" y1="${top+bh*0.8}" x2="${cx+rx*0.7}" y2="226"/></g><rect x="${cx-9}" y="218" width="18" height="10" rx="2" fill="#37474f"/>
+    <g data-play="${m}"><path d="M${cx-rx} ${top} C${cx-rx} ${top+bh*0.9} ${cx-rx*0.5} ${top+bh} ${cx} ${top+bh} C${cx+rx*0.5} ${top+bh} ${cx+rx} ${top+bh*0.9} ${cx+rx} ${top} Z" fill="url(#tpC)" stroke="#5a2a0a" stroke-width="2"/>
+    <ellipse cx="${cx}" cy="${top}" rx="${rx}" ry="${ry}" fill="#f6f1e4" stroke="#9aa5ab" stroke-width="4"/>${[0.15,0.5,0.85].map(f=>`<rect x="${cx-rx+f*rx*2-2}" y="${top+ry*0.6}" width="4" height="12" fill="#9aa5ab"/>`).join('')}
+    <text x="${cx}" y="${top+bh*0.62}" text-anchor="middle" font-size="16" font-weight="900" fill="#fff">${NK[m%12]}</text><text x="${cx}" y="${top+bh*0.62+14}" text-anchor="middle" font-size="10" fill="#fff" opacity=".85">${Math.floor(m/12)-1}</text></g>`;});
+  return s+'</svg>';
+}
+function vibeStage(){
+  // 비브라폰: 금속 음판 + 은색 울림관 + 모터 날개(켜면 돎)
+  const ps=INST.vibraphone.pitches.slice().sort((a,b)=>a-b),nat=ps.filter(m=>!isBlack(m)),N=nat.length,W=600/N,mot=techOf('vibraphone','')==='motor';
+  let s=`<svg viewBox="0 0 640 262"><defs><linearGradient id="vbM" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#f4f0e2"/><stop offset=".5" stop-color="#cfc6a8"/><stop offset="1" stop-color="#9c9278"/></linearGradient><linearGradient id="vbT" x1="0" x2="1"><stop offset="0" stop-color="#8f9ca3"/><stop offset=".5" stop-color="#eef2f4"/><stop offset="1" stop-color="#8f9ca3"/></linearGradient></defs>
+  <line x1="20" y1="214" x2="620" y2="214" stroke="#37474f" stroke-width="3"/><text x="620" y="256" text-anchor="end" font-size="11" fill="#546e7a">모터: ${mot?'켜짐 (울렁울렁)':'꺼짐'}</text>`;
+  nat.forEach((m,i)=>{const x=20+i*W,h=98-i*2.4,cy=168;
+    s+=`<rect x="${x+W/2-7}" y="${cy+h/2}" width="14" height="${244-cy-h/2}" fill="url(#vbT)" stroke="#78909c" stroke-width="1"/><ellipse cx="${x+W/2}" cy="${cy+h/2+4}" rx="6" ry="2" fill="#546e7a" ${mot?'class="spin"':''}/>`;
+    s+=`<g data-play="${m}"><rect x="${x+2}" y="${cy-h/2}" width="${W-4}" height="${h}" rx="4" fill="url(#vbM)" stroke="#6d6450" stroke-width="1.5"/><circle cx="${x+W/2}" cy="${cy-h/2+8}" r="2.5" fill="#6d6450"/><circle cx="${x+W/2}" cy="${cy+h/2-8}" r="2.5" fill="#6d6450"/><text x="${x+W/2}" y="${cy+5}" text-anchor="middle" font-size="12" font-weight="900" fill="#3e3a2c">${NK[m%12]}</text></g>`;});
+  ps.filter(isBlack).forEach(m=>{const i=nat.indexOf(m-1),x=20+(i+1)*W-W/2,h=(98-i*2.4)*0.8,cy=62;
+    s+=`<g data-play="${m}"><rect x="${x+3}" y="${cy-h/2}" width="${W-6}" height="${h}" rx="4" fill="url(#vbM)" stroke="#6d6450" stroke-width="1.5"/><text x="${x+W/2}" y="${cy+4}" text-anchor="middle" font-size="10" font-weight="900" fill="#3e3a2c">${NK[m%12]}</text></g>`;});
+  return s+'</svg>';
+}
 function cajonStage(){
   // 상자(앞판 타파 + 윗면 + 옆면), 모서리 나사, 나뭇결
   let grain='';for(let i=0;i<7;i++)grain+=`<path d="M200 ${48+i*30} Q320 ${40+i*30} 440 ${50+i*30}" stroke="#b98a52" stroke-width="1.2" fill="none" opacity=".5"/>`;
@@ -2042,7 +2237,7 @@ function steelStage(){
     s+=`<g data-play="${m}"><ellipse cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" rx="24" ry="15" fill="url(#stN)" stroke="#546e7a" stroke-width="1.8"/><text x="${x.toFixed(1)}" y="${(y+5).toFixed(1)}" text-anchor="middle" font-size="12" font-weight="900" fill="#263238">↑${NK[m%12]}</text></g>`;});
   return s+'</svg>';
 }
-function stageBody(k){return {eguitar:guitarStage,harp:harpStage,haegeum:haeStage,marimba:marStage,cajon:cajonStage,steelpan:steelStage,voice:voiceStage,melodica:meloStage,cello:violinStage,gayageum:gayaStage,pungmul:pungStage,handbell:bellStage,harmonica:harmStage,piano:pianoStage,synth:pianoStage,drums:drumStage,xylo:xyloStage,guitar:guitarStage,ukulele:guitarStage,bass:bassStage,bass6:bassStage,violin:violinStage,recorder:recorderStage,janggu:jangguStage,rhythm:rhythmStage,kalimba:kalimbaStage,trumpet:trumpetStage}[k]();}
+function stageBody(k){return {eguitar:guitarStage,harp:harpStage,haegeum:haeStage,marimba:marStage,cajon:cajonStage,viola:violinStage,contrabass:violinStage,danso:dansoStage,flute:fluteStage,clarinet:clarinetStage,sax:saxStage,ocarina:ocarinaStage,timpani:timpStage,vibraphone:vibeStage,steelpan:steelStage,voice:voiceStage,melodica:meloStage,cello:violinStage,gayageum:gayaStage,pungmul:pungStage,handbell:bellStage,harmonica:harmStage,piano:pianoStage,synth:pianoStage,drums:drumStage,xylo:xyloStage,guitar:guitarStage,ukulele:guitarStage,bass:bassStage,bass6:bassStage,violin:violinStage,recorder:recorderStage,janggu:jangguStage,rhythm:rhythmStage,kalimba:kalimbaStage,trumpet:trumpetStage}[k]();}
 
 const HINT={
  eguitar:'줄 위를 위아래로 쓸어 쳐 보세요. 앰프를 거친 찌그러진 소리가 나요.',
@@ -2054,6 +2249,15 @@ const HINT={
  voice:'이어폰을 끼고 녹음하면 반주 소리가 덜 섞여요. 녹음은 박자를 한 마디 세어 준 뒤 시작돼요. 처음 한 번은 마이크 사용을 허용해 주세요.',
  melodica:'건반을 꾹 누르고 있는 동안 숨을 부는 것처럼 소리가 이어져요. 두세 개를 함께 누르면 화음!',
  cello:'음을 꾹 누르고 있으면 활을 그어 소리가 이어져요. 바이올린보다 한참 낮은 소리를 들어 보세요.',
+ danso:'음 버튼을 꾹 누르고 있으면 그 운지로 불어요. 위 그림에서 검게 칠해진 구멍이 막는 구멍이에요. 높은 음(점)은 같은 운지로 더 세게!',
+ flute:'음을 꾹 누르고 있는 동안 소리가 이어져요. 맑고 부드러운 소리를 들어 보세요.',
+ clarinet:'음을 꾹 누르고 있는 동안 소리가 이어져요. 낮은 음과 높은 음의 느낌이 어떻게 다른지 들어 보세요.',
+ sax:'음을 꾹 누르고 있는 동안 소리가 이어져요. 재즈처럼 짧게 끊어 불어도 멋져요.',
+ ocarina:'음을 꾹 누르고 있는 동안 소리가 이어져요. 동그랗고 순한 소리예요.',
+ timpani:'북을 두드려 보세요. 큰 북일수록 낮은 소리! 주법에서 굴리기(롤)를 고르면 두르르르 울려요.',
+ vibraphone:'음판을 두드려 보세요. 주법에서 "모터 켜기"를 고르면 소리가 울렁울렁 떨려요.',
+ viola:'음을 꾹 누르고 있으면 활을 그어 소리가 이어져요. 바이올린과 첼로 사이의 차분한 소리예요.',
+ contrabass:'음을 꾹 누르고 있으면 활을 그어 소리가 이어져요. 위의 주법에서 피치카토를 고르면 재즈처럼 뜯는 소리가 나요.',
  gayageum:'줄을 뜯듯이 눌러 보세요. 위쪽 줄일수록 낮은 소리예요. 소리가 끝날 때쯤 살짝 떨리는 농현을 들어 보세요.',
  pungmul:'꽹과리·징·북·소고를 두드려 보세요. 꽹과리를 막고 치는 "갠"은 아래 버튼으로!',
  handbell:'종을 눌러 흔들어 보세요. 모둠 친구들이 종을 나눠 맡으면 진짜 핸드벨 합주처럼 만들 수 있어요.',
@@ -2129,8 +2333,9 @@ function recordStrum(dir,s){
 }
 
 function setStrLine(n,on){const el=document.querySelector(`#stage [data-strline="${n}"]`);if(el)el.classList.toggle('down',on);}
-function holdVoice(k,m,t,v){const sr=sfPlay(k,m,t,30,v,true);if(sr)return sr;switch(k){case'haegeum':return pHae(m,t,30,v,true);case'cello':return pVio(m,t,30,v,true,'cello');case'harmonica':return pReed(m,t,30,v,true,true);case'melodica':return pReed(m,t,30,v,true,false);case'recorder':return pRec(m,t,30,v,true);case'violin':return pVio(m,t,30,v,true,'violin');case'bass':return pBass(m,t,30,v,true,'bass');case'bass6':return pBass(m,t,30,v,true,'bass6');case'trumpet':return pTpt(m,t,30,v,true);case'synth':return pSyn(m,t,30,v,true,synWave());}return [];}
+function holdVoice(k,m,t,v){const sr=sfPlay(k,m,t,30,v,true);if(sr)return sr;switch(k){case'haegeum':return pHae(m,t,30,v,true);case'cello':return pVio(m,t,30,v,true,'cello');case'viola':return pVio(m,t,30,v,true,'viola');case'contrabass':return pVio(m,t,30,v,true,'contrabass');case'danso':return pWind(dansoM(m),t,30,v,true,'danso');case'flute':return pWind(m,t,30,v,true,'flute');case'ocarina':return pWind(m,t,30,v,true,'ocarina');case'sax':return pReed2(m,t,30,v,true,'sax');case'clarinet':return pReed2(m,t,30,v,true,'clarinet');case'harmonica':return pReed(m,t,30,v,true,true);case'melodica':return pReed(m,t,30,v,true,false);case'recorder':return pRec(m,t,30,v,true);case'violin':return pVio(m,t,30,v,true,'violin');case'bass':return pBass(m,t,30,v,true,'bass');case'bass6':return pBass(m,t,30,v,true,'bass6');case'trumpet':return pTpt(m,t,30,v,true);case'synth':return pSyn(m,t,30,v,true,synWave());}return [];}
 function startHold(k,m,el){
+  if(k==='danso'){ui.last.danso=m;updDansoUI();}
   initAudio();const t=AC.currentTime+0.005;
   hold={k,m,gs:holdVoice(k,m,t,vol(k)),el,t0:AC.currentTime,step:inputStep()};
   if(el)el.classList.add('down');
@@ -2453,10 +2658,10 @@ function unlockAll(){
 /* ---------- 역할 카드 ---------- */
 const ROLES={
  rhythm:{n:'리듬 담당',c:'#e5534b',inst:['drums','janggu','pungmul','cajon','rhythm'],todo:['박자를 받쳐 줄 타악기를 하나 골라요','리듬(장단) 도장으로 시작해요','한 마디는 직접 바꿔서 우리만의 리듬을 만들어요','마지막 마디는 심벌이나 징으로 마무리해요']},
- melody:{n:'가락 담당',c:'#4f6bed',inst:['piano','recorder','xylo','violin','trumpet','kalimba','harmonica','melodica','synth','steelpan','haegeum','handbell'],todo:['가락을 맡을 악기를 골라요','"한 칸씩 넣기"와 리듬 카드로 가락을 넣어요','같은 가락을 한 번 더 써서 기억에 남게 해요','마지막 음을 도(으뜸음)로 끝내 봐요']},
- chord:{n:'반주 담당',c:'#e2883a',inst:['guitar','ukulele','eguitar','bass','bass6','harp','gayageum','marimba','piano'],todo:['코드를 칠 악기를 골라요','코드 진행을 하나 골라요 (예: C-G-Am-F)','치는 방법(스트럼)을 골라요','베이스는 "코드 근음 따라가기"를 눌러요']},
+ melody:{n:'가락 담당',c:'#4f6bed',inst:['piano','recorder','flute','clarinet','sax','ocarina','danso','xylo','violin','trumpet','kalimba','harmonica','melodica','synth','steelpan','haegeum','handbell'],todo:['가락을 맡을 악기를 골라요','"한 칸씩 넣기"와 리듬 카드로 가락을 넣어요','같은 가락을 한 번 더 써서 기억에 남게 해요','마지막 음을 도(으뜸음)로 끝내 봐요']},
+ chord:{n:'반주 담당',c:'#e2883a',inst:['guitar','ukulele','eguitar','bass','bass6','contrabass','harp','gayageum','marimba','piano'],todo:['코드를 칠 악기를 골라요','코드 진행을 하나 골라요 (예: C-G-Am-F)','치는 방법(스트럼)을 골라요','베이스는 "코드 근음 따라가기"를 눌러요']},
  voice:{n:'목소리 담당',c:'#f4511e',inst:['voice'],todo:['가사 줄에 가사를 써요','목소리 트랙에 노래나 랩을 녹음해요','박수나 효과음도 넣어 봐요']},
- deco:{n:'꾸밈·구조 담당',c:'#7b6cf6',inst:['handbell','kalimba','harp','synth','cello','rhythm'],todo:['분위기를 살릴 악기를 골라요','곡의 처음이나 끝에 꾸밈음을 넣어요','곡 구조(A, B)와 순서를 정해요','발표 전에 악기 소리 크기를 맞춰요']}
+ deco:{n:'꾸밈·구조 담당',c:'#7b6cf6',inst:['handbell','kalimba','harp','synth','cello','viola','vibraphone','timpani','rhythm'],todo:['분위기를 살릴 악기를 골라요','곡의 처음이나 끝에 꾸밈음을 넣어요','곡 구조(A, B)와 순서를 정해요','발표 전에 악기 소리 크기를 맞춰요']}
 };
 function roleOf(id){if(mode==='online')return (onlineMembers[id]||{}).role||'';const m=members.find(x=>x.id===id);return (m&&m.role)||'';}
 function setRole(id,r){
@@ -2539,7 +2744,7 @@ async function openGallery(admin){
 }
 
 /* ===================== 추가 기능 2 ===================== */
-const GROUPS=[['목소리',['voice']],['건반악기',['piano','synth','melodica']],['현악기',['guitar','eguitar','ukulele','bass','bass6','harp','violin','cello']],['관악기',['recorder','harmonica','trumpet']],['음높이가 있는 타악기',['xylo','marimba','kalimba','steelpan','handbell']],['리듬 타악기',['drums','cajon','rhythm']],['우리 악기',['janggu','pungmul','gayageum','haegeum']]];
+const GROUPS=[['목소리',['voice']],['건반악기',['piano','synth','melodica']],['현악기',['guitar','eguitar','ukulele','bass','bass6','harp','violin','viola','cello','contrabass']],['관악기',['recorder','flute','clarinet','sax','ocarina','harmonica','trumpet']],['음높이가 있는 타악기',['xylo','marimba','vibraphone','kalimba','steelpan','handbell','timpani']],['리듬 타악기',['drums','cajon','rhythm']],['우리 악기',['janggu','pungmul','gayageum','haegeum','danso']]];
 /* ---------- 되돌리기 ---------- */
 const HIST={stack:[],i:-1,t:null},CLIPS={};let RESTORING=false;
 function snapState(){
